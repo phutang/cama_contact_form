@@ -19,7 +19,9 @@
             <thead>
             <tr>
               <% @op_fields.each do |f| %>
-                <th><%= f[:label].to_s.translate %></th>
+                <% unless f[:field_type] == "editor" %>
+                  <th><%= f[:label].to_s.translate %></th>
+                <% end %>
               <% end %>
               <th><%= t('.created_at', default: 'Registered at') %></th>
               <th></th>
@@ -41,7 +43,7 @@
                     <% elsif default[:field_type] == "radio" || default[:field_type] == "checkboxes" %>
                         <td><%= value[:fields][cid].map { |f| f.to_s.translate }.join(', ') if value[:fields][cid].present? %></td>
                     <% elsif default[:field_type] == "editor" %>
-                    
+
                     <% else %>
                         <td><%= value[:fields][cid] %></td>
                     <% end %>
