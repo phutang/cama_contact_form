@@ -40,6 +40,8 @@
                         </td>
                     <% elsif default[:field_type] == "radio" || default[:field_type] == "checkboxes" %>
                         <td><%= value[:fields][cid].map { |f| f.to_s.translate }.join(', ') if value[:fields][cid].present? %></td>
+                    <% elsif default[:field_type] == "editor" %>
+                    
                     <% else %>
                         <td><%= value[:fields][cid] %></td>
                     <% end %>
