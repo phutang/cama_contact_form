@@ -30,7 +30,7 @@ class Plugins::CamaContactForm::CamaContactForm < ActiveRecord::Base
   end
 
   def self.field_template
-    "<div class='form-group'>\n\t <label>[label ci]</label>\n\t<p>[descr ci]</p>\n\t<div>[ci]</div> \n</div>"
+    "<div class='form-group [cc]'>\n\t <label>[label ci]</label>\n\t<p>[descr ci]</p>\n\t<div>[ci]</div> \n</div>"
   end
   
   # define recaptcha settings
