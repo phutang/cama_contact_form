@@ -83,9 +83,13 @@ module Plugins::CamaContactForm::MainHelper
       ob = r[:field]
       ob[:custom_class] = r[:custom_class]
       ob[:custom_attrs] = r[:custom_attrs]
-      ob[:custom_attrs][:required] = 'true' if ob[:required].present? && ob[:required].to_bool
       field_options = ob[:field_options]
       for_name = ob[:label].to_s
+      if ob[:required].present? && ob[:required].to_bool
+        ob[:custom_attrs][:required] = 'true'
+        for_name = "#{for_name}<span class=\"field_required\">*</span>"
+      end
+
       f_name = "fields[#{ob[:cid]}]"
       cid = ob[:cid].to_sym
 
@@ -124,6 +128,7 @@ module Plugins::CamaContactForm::MainHelper
       r[:template] = r[:template].sub('[ci]', temp2)
       r[:template] = r[:template].sub('[descr ci]', field_options[:description].to_s.translate).sub('<p></p>', '')
       r[:template] = r[:template].sub('[cc]', ob[:custom_class].to_s)
+
       html += r[:template].gsub('[label ci]', for_name)
     end
     html
@@ -144,15 +149,18 @@ module Plugins::CamaContactForm::MainHelper
       html = "<select #{ob[:custom_attrs].to_attr_format} name=\"#{f_name}\" >"
     end
 
-    options.each do |op|
+    options.each_with_index do |op, idx|
       label = op[:label].translate
       if type == "radio" || type == "checkbox"
+        ob_id = ob[:custom_attrs][:id]
+        ob[:custom_attrs][:id] = "#{ob_id}_#{idx}"
         html += "<div class=\"#{type}\">
-                    <label for=\"#{ob[:cid]}\">
-                      <input #{ob[:custom_attrs].to_attr_format} type=\"#{type}\" #{'checked' if op[:checked].to_s.cama_true?} name=\"#{f_name}[]\" class=\"\" value=\"#{label.downcase}\">
-                      #{label}
+                    <label for=\"#{ob[:cid]}_#{idx}\">
+                      <input #{ob[:custom_attrs].to_attr_format} type=\"#{type}\" #{'checked' if op[:checked].to_s.cama_true?} name=\"#{f_name}[]\" value=\"#{ERB::Util.h(label.downcase)}\">
+                      #{ERB::Util.h(label)}
                     </label>
                   </div>"
+        ob[:custom_attrs][:id] = ob_id
       else
         html += "<option  value=\"#{label.downcase.gsub(" ", "_")}\" #{"selected" if "#{label.downcase.gsub(" ", "_")}" == values[cid] || op[:checked].to_s.cama_true? } >#{label}</option>"
       end
