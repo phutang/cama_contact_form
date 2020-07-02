@@ -16,16 +16,12 @@
     <div class="panel-body">
         <%= hidden_field_tag "fields[#{cid}][cid]", cid %>
         <% if field[:field_type] == 'editor' %>
-
+            <%= hidden_field_tag "fields[#{cid}][label]", 'editor' %>
             <div class="form-group">
                 <%= label_tag nil, t('.template', default: 'Template') %>
                 <%= text_area_tag "fields[#{cid}][field_options][template]", field[:field_options][:template], class: 'form-control', rows: 6, placeholder: Plugins::CamaContactForm::CamaContactForm::field_template %>
             </div>
-
         <% else %>
-        
-
-        
         <div class="form-group ">
             <label for=""><%= t('.label') %></label><br>
             <%= text_field_tag "fields[#{cid}][label]", field[:label], class: 'form-control translatable' %>
