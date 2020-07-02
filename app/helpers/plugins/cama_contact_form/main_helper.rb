@@ -115,7 +115,7 @@ module Plugins::CamaContactForm::MainHelper
           temp2 = "<input #{ob[:custom_attrs].to_attr_format} type=\"#{ob[:field_type]}\" value=\"#{values[cid] || ob[:default_value].to_s.translate}\" name=\"#{f_name}\"  class=\"form-control #{class_type}\">"
         when 'captcha'
           if form.recaptcha_enabled?
-            temp2 = recaptcha_tags(script: false, noscript: false)
+            temp2 = "<vue-recaptcha sitekey='#{form.the_settings[:recaptcha_site_key]}'></vue-recaptcha>"
           else
             temp2 = cama_captcha_tag(5, {}, {class: "#{'form-control'} field-captcha required"}.merge(ob[:custom_attrs]))
           end
