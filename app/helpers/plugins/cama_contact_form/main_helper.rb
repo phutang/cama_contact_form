@@ -112,7 +112,11 @@ module Plugins::CamaContactForm::MainHelper
           class_type = ""
           class_type = "railscf-field-#{ob[:field_type]}" if ob[:field_type]=="website"
           class_type = "railscf-field-#{ob[:field_type]}" if ob[:field_type]=="email"
-          temp2 = "<input #{ob[:custom_attrs].to_attr_format} type=\"#{ob[:field_type]}\" value=\"#{values[cid] || ob[:default_value].to_s.translate}\" name=\"#{f_name}\"  class=\"form-control #{class_type}\">"
+
+          blur_func = ""
+          blur_func = "v-on:blur=\"onBlurPostcode($event)\"" if ob[:custom_class].to_s.include?('postcode')
+
+          temp2 = "<input #{ob[:custom_attrs].to_attr_format} type=\"#{ob[:field_type]}\" value=\"#{values[cid] || ob[:default_value].to_s.translate}\" name=\"#{f_name}\" class=\"form-control #{class_type}\" #{blur_func}>"
         when 'captcha'
           if form.recaptcha_enabled?
             temp2 = "<vue-recaptcha sitekey='#{form.the_settings[:recaptcha_site_key]}'></vue-recaptcha>"
