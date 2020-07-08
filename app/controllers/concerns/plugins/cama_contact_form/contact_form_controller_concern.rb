@@ -48,20 +48,20 @@ module Plugins::CamaContactForm::ContactFormControllerConcern
       cid = f[:cid].to_sym
       label = f[:label].to_sym
       case f[:field_type].to_s
-        when 'text', 'website', 'paragraph', 'textarea', 'email', 'radio', 'checkboxes', 'dropdown', 'file'
+        when 'text', 'website', 'paragraph', 'textarea', 'email', 'radio', 'checkboxes', 'dropdown', 'file', 'dealer_selector'
           if f[:required].to_s.cama_true? && !fields[cid].present?
-            errors << "#{label.to_s.translate}: #{form.the_message('invalid_required', t('.error_validation_val', default: 'This value is required'))}"
+            errors << "#{cid}:#{form.the_message('invalid_required', t('.error_validation_val', default: 'This value is required'))}"
             validate = false
           end
-          if f[:field_type].to_s == 'email'
+          if f[:field_type].to_s == 'email' && fields[cid].present?
             unless fields[cid].match(/@/)
-              errors << "#{label.to_s.translate}: #{form.the_message('invalid_email', t('.email_invalid_val', default: 'The e-mail address appears invalid'))}"
+              errors << "#{cid}:#{form.the_message('invalid_email', t('.email_invalid_val', default: 'The e-mail address appears invalid'))}"
               validate = false
             end
           end
         when 'captcha'
           error_message = ->{
-            errors << "#{label.to_s.translate}: #{form.the_message('captcha_not_match', t('.captch_error_val', default: 'The entered code is incorrect'))}"
+            errors << "#{cid}:#{form.the_message('captcha_not_match', t('.captch_error_val', default: 'The entered code is incorrect'))}"
             validate = false
           }
 

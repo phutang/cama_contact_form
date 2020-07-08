@@ -78,7 +78,7 @@ module Plugins::CamaContactForm::MainHelper
     object.each do |ob|
       ob[:label] = ob[:label].to_s.translate
       ob[:description] = ob[:description].to_s.translate
-      r = {field: ob, form: form, template: (ob[:field_options][:template].present? ? ob[:field_options][:template] :  Plugins::CamaContactForm::CamaContactForm::field_template), custom_class: (ob[:field_options][:field_class] rescue nil), custom_attrs: {id: ob[:cid] }.merge((JSON.parse(ob[:field_options][:field_attributes]) rescue {})) }
+      r = {field: ob, form: form, template: (ob[:field_options][:template].present? ? ob[:field_options][:template] : Plugins::CamaContactForm::CamaContactForm::field_template), custom_class: (ob[:field_options][:field_class] rescue nil), custom_attrs: {id: ob[:cid] }.merge((JSON.parse(ob[:field_options][:field_attributes]) rescue {})) }
       hooks_run("contact_form_item_render", r)
       ob = r[:field]
       ob[:custom_class] = r[:custom_class]
@@ -127,6 +127,8 @@ module Plugins::CamaContactForm::MainHelper
           temp2 = "<input multiple=\"multiple\" type=\"file\" value=\"\" name=\"#{f_name}[]\" #{ob[:custom_attrs].to_attr_format} class=\"form-control\">"
         when 'dropdown'
           temp2 = cama_form_select_multiple_bootstrap(ob, ob[:label], "select",values)
+        when 'dealer_selector'
+          temp2 = "<dealer-selector #{ob[:custom_attrs].to_attr_format} name=\"#{f_name}\"></dealer-selector>"
         else
       end
       r[:template] = r[:template].sub('[ci]', temp2)
@@ -150,6 +152,7 @@ module Plugins::CamaContactForm::MainHelper
       other_input = (include_other_option)? "<div class=\"#{type}\"> <label for=\"#{ob[:cid]}\"><input id=\"#{ob[:cid]}-other\" type=\"#{type}\" name=\"#{title.downcase}[]\" class=\"\">Other <input type=\"text\" /></label></div>" : " "
     else
       html = "<select #{ob[:custom_attrs].to_attr_format} name=\"#{f_name}\" >"
+      html += "<option value=\"\">Please select</option>"
     end
 
     options.each_with_index do |op, idx|

@@ -38,7 +38,7 @@
             <%= text_area_tag "fields[#{cid}][field_options][description]", field[:field_options][:description], class: 'form-control translatable' %>
         </div>
         <% case field[:field_type] %>
-            <% when 'checkboxes', 'radio', 'select', 'dropdown'; options = (field[:field_options][:options] || []) %>
+            <% when 'dealer_selector', 'checkboxes', 'radio', 'select', 'dropdown'; options = (field[:field_options][:options] || []) %>
                 <label><%= t('.options', default: 'Options') %></label>
                 <ul class="options_sortable" data-options-count="<%= options.size %>">
                     <% options.unshift({label: '', checked: false}).each_with_index do |option, index| %>
