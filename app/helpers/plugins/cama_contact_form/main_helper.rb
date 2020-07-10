@@ -129,6 +129,8 @@ module Plugins::CamaContactForm::MainHelper
           temp2 = cama_form_select_multiple_bootstrap(ob, ob[:label], "select",values)
         when 'dealer_selector'
           temp2 = "<dealer-selector #{ob[:custom_attrs].to_attr_format} name=\"#{f_name}\"></dealer-selector>"
+        when 'dealer_card_picker'
+          temp2 = "<dealer-card-picker #{ob[:custom_attrs].to_attr_format} name=\"#{f_name}\"></dealer-card-picker>"
         else
       end
       r[:template] = r[:template].sub('[ci]', temp2)
