@@ -139,6 +139,30 @@ module Plugins::CamaContactForm::MainHelper
     html
   end
 
+  def field_action_values(action)
+    result = {}
+    if action.present?
+      items = action.split('::')
+      result[:action_type] = items[0]
+      result[:matched_value] = items[1]
+      result[:selector] = items[2]
+    end
+
+    result
+  end
+
+  def vuejs_actions(action)
+    result = ''
+    if action.present?
+      items = action.split('::')
+      if items[0] == 'onchange'
+        result = "v-on:change=\"onChangeInput($event, '#{items[2]}')\""
+      end
+    end
+
+    result
+  end
+
   def cama_form_select_multiple_bootstrap(ob, title, type, values)
     options = ob[:field_options][:options]
     include_other_option = ob[:field_options][:include_other_option]
@@ -159,12 +183,14 @@ module Plugins::CamaContactForm::MainHelper
       label = op[:label].translate
       key = label.downcase.gsub(" ", "_")
       key = op[:key] if op[:key].present?
+      action = field_action_values(ob[:field_options][:field_actions])
+
       if type == "radio" || type == "checkbox"
         ob_id = ob[:custom_attrs][:id]
         ob[:custom_attrs][:id] = "#{ob_id}_#{idx}"
         html += "<div class=\"#{type}\">
                     <label for=\"#{ob[:cid]}_#{idx}\">
-                      <input #{ob[:custom_attrs].to_attr_format} type=\"#{type}\" #{'checked' if op[:checked].to_s.cama_true?} name=\"#{f_name}[]\" value=\"#{ERB::Util.h(label.downcase)}\">
+                      <input #{vuejs_actions(ob[:field_options][:field_actions]) if key == action[:matched_value]} #{ob[:custom_attrs].to_attr_format} type=\"#{type}\" #{'checked' if op[:checked].to_s.cama_true?} name=\"#{f_name}[]\" value=\"#{key}\">
                       #{ERB::Util.h(label)}
                     </label>
                   </div>"

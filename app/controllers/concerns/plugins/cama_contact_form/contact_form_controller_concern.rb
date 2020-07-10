@@ -47,11 +47,19 @@ module Plugins::CamaContactForm::ContactFormControllerConcern
     form.fields.each do |f|
       cid = f[:cid].to_sym
       label = f[:label].to_sym
+      action = field_action_values(f[:field_options][:field_actions])
       case f[:field_type].to_s
         when 'text', 'website', 'paragraph', 'textarea', 'email', 'radio', 'checkboxes', 'dropdown', 'file', 'dealer_selector'
           if f[:required].to_s.cama_true? && !fields[cid].present?
-            errors << "#{cid}:#{form.the_message('invalid_required', t('.error_validation_val', default: 'This value is required'))}"
-            validate = false
+            if action[:action_type] == 'onrequired'
+              if fields[action[:matched_value]].include?(action[:selector])
+                errors << "#{cid}:#{form.the_message('invalid_required', t('.error_validation_val', default: 'This value is required'))}"
+                validate = false
+              end
+            else
+              errors << "#{cid}:#{form.the_message('invalid_required', t('.error_validation_val', default: 'This value is required'))}"
+              validate = false
+            end
           end
           if f[:field_type].to_s == 'email' && fields[cid].present?
             unless fields[cid].match(/@/)
