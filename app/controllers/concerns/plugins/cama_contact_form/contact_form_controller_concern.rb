@@ -26,19 +26,39 @@ module Plugins::CamaContactForm::ContactFormControllerConcern
       form_new = current_site.contact_forms.new(name: "response-#{Time.now}", description: form.description, settings: new_settings, site_id: form.site_id, parent_id: form.id)
       if form_new.save
         fields_data = convert_form_values(form, fields)
-        message_body = form.the_settings[:railscf_mail][:body].to_s.translate.cama_replace_codes(fields)
+        message_body = form.the_settings[:railscf_mail][:body].to_s.translate.cama_replace_codes(fields).replace_newlines
         content = render_to_string(partial: plugin_view('contact_form/email_content'), layout: false, formats: ['html'], locals: {file_attachments: attachments, fields: fields_data, values: fields, message_body: message_body, form: form})
         cama_send_email(form.the_settings[:railscf_mail][:to], form.the_settings[:railscf_mail][:subject].to_s.translate.cama_replace_codes(fields), {attachments: attachments, content: content, extra_data: {fields: fields_data}})
         success << form.the_message('mail_sent_ok', t('.success_form_val', default: 'Your message has been sent successfully. Thank you very much!'))
         args = {form: form, values: fields}; hooks_run("contact_form_after_submit", args)
         if form.the_settings[:railscf_mail][:to_answer].present? && (answer_to = fields[form.the_settings[:railscf_mail][:to_answer].gsub(/(\[|\])/, '').to_sym]).present?
-          content = form.the_settings[:railscf_mail][:body_answer].to_s.translate.cama_replace_codes(fields)
+          content = form.the_settings[:railscf_mail][:body_answer].to_s.translate.cama_replace_codes(fields).replace_newlines
           cama_send_email(answer_to, form.the_settings[:railscf_mail][:subject_answer].to_s.translate.cama_replace_codes(fields), {content: content})
         end
+        send_email_to_dealer(form, fields)
       else
         errors << form.the_message('mail_sent_ng', t('.error_form_val', default: 'An error occurred, please try again.'))
       end
     end
+  end
+
+  def send_email_to_dealer(form, fields)
+    dealer_fields = form.fields.select {|field| field['field_type'] == 'dealer_selector'}
+    return unless dealer_fields.present?
+    dealer_field = dealer_fields.first
+    dealer_id = fields[dealer_field['cid']]
+    return unless dealer_id.present?
+    post_type = current_site.post_types.find_by_slug(ENV['dealer_slug'])
+    return unless post_type.present?
+    dealer = post_type.posts.includes(:custom_field_values).find(dealer_id)
+    return unless dealer.present?
+    dealer_email = dealer.get_field_value('email')
+    dealer_email = ENV['dealer_email'] if ENV['dealer_email'].present?
+    return unless dealer_email.present?
+    fields_data = convert_form_values(form, fields)
+    message_body = form.the_settings[:railscf_mail][:body_dealer].to_s.translate.cama_replace_codes(fields).replace_newlines
+    content = render_to_string(partial: plugin_view('contact_form/email_content'), layout: false, formats: ['html'], locals: {fields: fields_data, message_body: message_body})
+    cama_send_email(dealer_email, form.the_settings[:railscf_mail][:subject_dealer].to_s.translate.cama_replace_codes(fields), {content: content})
   end
 
   # form validations
@@ -50,7 +70,7 @@ module Plugins::CamaContactForm::ContactFormControllerConcern
       action = field_action_values(f[:field_options][:field_actions])
       case f[:field_type].to_s
         when 'text', 'website', 'paragraph', 'textarea', 'email', 'radio', 'checkboxes', 'dropdown', 'file', 'dealer_selector'
-          if f[:required].to_s.cama_true? && !fields[cid].present?
+          if f[:required].to_s.cama_true? && (!fields[cid].present? || fields[cid] == 'na')
             if action[:action_type] == 'onrequired'
               if fields[action[:matched_value]].include?(action[:selector])
                 errors << "#{cid}:#{form.the_message('invalid_required', t('.error_validation_val', default: 'This value is required'))}"
@@ -106,6 +126,6 @@ module Plugins::CamaContactForm::ContactFormControllerConcern
   end
 
   def relevant_field?(field)
-    !%w(captcha submit button).include? field[:field_type]
+    !%w(captcha submit button editor).include? field[:field_type]
   end
 end

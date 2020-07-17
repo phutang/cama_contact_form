@@ -178,7 +178,6 @@ module Plugins::CamaContactForm::MainHelper
       other_input = (include_other_option)? "<div class=\"#{type}\"> <label for=\"#{ob[:cid]}\"><input id=\"#{ob[:cid]}-other\" type=\"#{type}\" name=\"#{title.downcase}[]\" class=\"\">Other <input type=\"text\" /></label></div>" : " "
     else
       html = "<select #{ob[:custom_attrs].to_attr_format} name=\"#{f_name}\" >"
-      html += "<option value=\"\">Please select</option>"
     end
 
     options.to_a.each_with_index do |op, idx|

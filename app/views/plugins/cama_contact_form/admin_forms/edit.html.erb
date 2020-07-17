@@ -135,6 +135,30 @@
             </div>
         </div>
 
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><%= t('.confirmation_email_settings', default: 'Dealer Email Settings') %></h3>
+                <ul class="panel-controls">
+                    <li><a href="#" class="panel-collapse"><span class="fa fa-angle-down"></span></a></li>
+                </ul>
+            </div>
+            <div class="panel-body">
+                <p><small><i><%= t('.confirmation_email_descr', default: 'Send To email will depend on dealer selection') %></i></small></p>
+                <div class="">
+
+                    <div class="form-group">
+                        <label><%= t('.subject', default: 'Subject') %>:</label><br>
+                        <input class="form-control translatable required" type="text" name="railscf_mail[subject_dealer]" value="<%= @form.the_settings[:railscf_mail][:subject_dealer] rescue '' %>" />
+                    </div>
+
+                    <div class="form-group">
+                        <label><%= t('.body_answer', default: 'Email message') %>:</label><br>
+                        <textarea placeholder="Hi [c2], thanks for contact us" rows="4" cols="5" class="form-control translatable" name="railscf_mail[body_dealer]"><%= @form.the_settings[:railscf_mail][:body_dealer] rescue '' %></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="panel panel-default panel-toggled">
             <div class="panel-heading">
                 <h3 class="panel-title"><%= t('.form_settings_messages', default: 'Message Settings') %></h3>
