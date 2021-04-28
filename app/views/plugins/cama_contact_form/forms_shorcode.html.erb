@@ -1,5 +1,6 @@
 <%
    @form =  attributes['slug'] == '__first__' ? current_site.contact_forms.first : current_site.contact_forms.where({slug: attributes['slug']}).first
+   is_post_back = attributes['postback'] == 'true'
    if @form.present?
      @form.set_captcha_settings!
      values_fields =  (flash[:values].present?)? flash[:values].to_sym : {}
@@ -8,8 +9,15 @@
      hooks_run("contact_form_render", r)
 %>
     <section>
+        <%
+            html_attrs = {method: "post", class: r[:form_class], multipart: true}
+            unless is_post_back 
+                html_attrs = html_attrs.merge(novalidate: true, 'v-on:submit.prevent': 'onSubmit($event)')
+            end
+        %>
+        <h1><%=  plugins_cama_contact_form_save_form_path %></h1>
         <%= raw r[:before_form] %>
-        <%= form_for @form, url: plugins_cama_contact_form_save_form_path, html: {method: "post", class: r[:form_class], multipart: true, novalidate: true, 'v-on:submit.prevent': 'onSubmit($event)'} do |f| %>
+        <%= form_for @form, url: plugins_cama_contact_form_save_form_path, html: html_attrs do |f| %>
             <%= hidden_field_tag "id", @form.id %>
             <%= render :partial => "camaleon_cms/flash_messages", locals:{ flash: (flash[:contact_form] || {}).with_indifferent_access } %>
             <%= raw cama_form_element_bootstrap_object(r[:form], values[:fields], values_fields) %>
