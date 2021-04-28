@@ -15,7 +15,6 @@
                 html_attrs = html_attrs.merge(novalidate: true, 'v-on:submit.prevent': 'onSubmit($event)')
             end
         %>
-        <h1><%=  plugins_cama_contact_form_save_form_path %></h1>
         <%= raw r[:before_form] %>
         <%= form_for @form, url: plugins_cama_contact_form_save_form_path, html: html_attrs do |f| %>
             <%= hidden_field_tag "id", @form.id %>
