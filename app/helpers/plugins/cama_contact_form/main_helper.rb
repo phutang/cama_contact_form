@@ -189,6 +189,7 @@ module Plugins::CamaContactForm::MainHelper
       if type == "radio" || type == "checkbox"
         ob_id = ob[:custom_attrs][:id]
         ob[:custom_attrs][:id] = "#{ob_id}_#{idx}"
+        ob[:custom_attrs].delete(:required)
         html += "<div class=\"#{type}\">
                     <label for=\"#{ob[:cid]}_#{idx}\">
                       <input #{vuejs_actions(ob[:field_options][:field_actions]) if key == action[:matched_value]} #{ob[:custom_attrs].to_attr_format} type=\"#{type}\" #{'checked' if op[:checked].to_s.cama_true?} name=\"#{f_name}[]\" value=\"#{key}\">

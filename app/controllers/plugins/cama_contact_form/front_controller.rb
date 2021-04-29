@@ -1,6 +1,7 @@
 class Plugins::CamaContactForm::FrontController < CamaleonCms::Apps::PluginsFrontController
   include Plugins::CamaContactForm::MainHelper
   include Plugins::CamaContactForm::ContactFormControllerConcern
+  include ActionView::Helpers::SanitizeHelper
   
   # here add your custom functions
   def save_form
@@ -17,7 +18,8 @@ class Plugins::CamaContactForm::FrontController < CamaleonCms::Apps::PluginsFron
       if success.present?
         flash[:contact_form][:notice] = success.join('<br>')
       else
-        flash[:contact_form][:error] = errors
+        clean_code_errors = errors.map { |err| strip_tags(err) }
+        flash[:contact_form][:error] = clean_code_errors.join('<br>')
         flash[:values] = fields.delete_if{|k, v| v.class.name == 'ActionDispatch::Http::UploadedFile' }
       end
     end
