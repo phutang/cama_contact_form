@@ -18,7 +18,8 @@ class Plugins::CamaContactForm::FrontController < CamaleonCms::Apps::PluginsFron
       if success.present?
         flash[:contact_form][:notice] = success.join('<br>')
       else
-        clean_code_errors = errors.map { |err| strip_tags(err) }
+        flash[:original_errors] = errors
+        clean_code_errors = errors.map { |err| strip_tags("#{err[:label]}: #{err[:message]}") }
         flash[:contact_form][:error] = clean_code_errors.join('<br>')
         flash[:values] = fields.delete_if{|k, v| v.class.name == 'ActionDispatch::Http::UploadedFile' }
       end

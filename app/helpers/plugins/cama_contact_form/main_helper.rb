@@ -73,7 +73,7 @@ module Plugins::CamaContactForm::MainHelper
   end
 
   # form contact with css bootstrap
-  def cama_form_element_bootstrap_object(form, object, values)
+  def cama_form_element_bootstrap_object(form, object, values, flash_error = [])
     html = ""
     object.each do |ob|
       ob[:label] = ob[:label].to_s.translate
@@ -81,7 +81,9 @@ module Plugins::CamaContactForm::MainHelper
       r = {field: ob, form: form, template: (ob[:field_options][:template].present? ? ob[:field_options][:template] : Plugins::CamaContactForm::CamaContactForm::field_template), custom_class: (ob[:field_options][:field_class] rescue nil), custom_attrs: {id: ob[:cid] }.merge((JSON.parse(ob[:field_options][:field_attributes]) rescue {})) }
       hooks_run("contact_form_item_render", r)
       ob = r[:field]
-      ob[:custom_class] = r[:custom_class]
+      has_error = (flash_error.select { |err| err["field"] == ob[:cid] }).present?
+      ob[:custom_class] = r[:custom_class] || " "
+      ob[:custom_class] += " has-error" if has_error
       ob[:custom_attrs] = r[:custom_attrs]
       field_options = ob[:field_options]
       for_name = ob[:label].to_s
@@ -101,7 +103,7 @@ module Plugins::CamaContactForm::MainHelper
         when 'radio'
           temp2=  cama_form_select_multiple_bootstrap(ob, ob[:label], ob[:field_type],values)
         when 'checkboxes'
-          temp2=  cama_form_select_multiple_bootstrap(ob, ob[:label], "checkbox",values)
+          temp2=  cama_form_select_multiple_bootstrap(ob, ob[:label], "checkbox", values)
         when 'submit'
           temp2 = "<button #{ob[:custom_attrs].to_attr_format} type=\"#{ob[:field_type]}\" name=\"#{f_name}\"  class=\"btn btn-default\">#{ob[:label]}</button>"
         when 'button'
@@ -185,6 +187,7 @@ module Plugins::CamaContactForm::MainHelper
       key = label.downcase.gsub(" ", "_")
       key = op[:key] if op[:key].present?
       action = field_action_values(ob[:field_options][:field_actions])
+      checked = values[cid].present? && values[cid].include?(key) ? true : op[:checked].to_s.cama_true?
 
       if type == "radio" || type == "checkbox"
         ob_id = ob[:custom_attrs][:id]
@@ -192,7 +195,7 @@ module Plugins::CamaContactForm::MainHelper
         ob[:custom_attrs].delete(:required)
         html += "<div class=\"#{type}\">
                     <label for=\"#{ob[:cid]}_#{idx}\">
-                      <input #{vuejs_actions(ob[:field_options][:field_actions]) if key == action[:matched_value]} #{ob[:custom_attrs].to_attr_format} type=\"#{type}\" #{'checked' if op[:checked].to_s.cama_true?} name=\"#{f_name}[]\" value=\"#{key}\">
+                      <input #{vuejs_actions(ob[:field_options][:field_actions]) if key == action[:matched_value]} #{ob[:custom_attrs].to_attr_format} type=\"#{type}\" #{'checked' if checked} name=\"#{f_name}[]\" value=\"#{key}\">
                       #{ERB::Util.h(label)}
                     </label>
                   </div>"

@@ -1,9 +1,11 @@
 <%
    @form =  attributes['slug'] == '__first__' ? current_site.contact_forms.first : current_site.contact_forms.where({slug: attributes['slug']}).first
    is_post_back = attributes['postback'] == 'true'
+   hide_details_in_flash = attributes['hide_flash'] == 'true'
    if @form.present?
      @form.set_captcha_settings!
      values_fields =  (flash[:values].present?)? flash[:values].to_sym : {}
+     error_fields = (flash[:original_errors].present?)? flash[:original_errors] : []
      values = JSON.parse(@form.value).to_sym
      r = {form: @form, form_class: "railscf-form railscf-form-group", before_form: @form.the_settings[:railscf_mail][:previous_html].to_s, after_form: @form.the_settings[:railscf_mail][:after_html].to_s, submit: "<div class='form-group'><button class='submit_btn btn btn-default pull-right' type='submit'>[submit_label]</button></div>"}
      hooks_run("contact_form_render", r)
@@ -14,12 +16,22 @@
             unless is_post_back 
                 html_attrs = html_attrs.merge(novalidate: true, 'v-on:submit.prevent': 'onSubmit($event)')
             end
+            flash_contact_form = (flash[:contact_form] || {}).with_indifferent_access
         %>
         <%= raw r[:before_form] %>
         <%= form_for @form, url: plugins_cama_contact_form_save_form_path, html: html_attrs do |f| %>
             <%= hidden_field_tag "id", @form.id %>
-            <%= render :partial => "camaleon_cms/flash_messages", locals:{ flash: (flash[:contact_form] || {}).with_indifferent_access } %>
-            <%= raw cama_form_element_bootstrap_object(r[:form], values[:fields], values_fields) %>
+            <% if !hide_details_in_flash %>
+            <%= render :partial => "camaleon_cms/flash_messages", locals:{ flash: flash_contact_form } %>
+            <% elsif !error_fields.blank? %>
+            <div class="cama_flash_messages">
+                <div class="alert alert-danger">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <span><%= t('errors.template.body', default: 'There were problems with the following fields:') %></span>
+                </div>
+            </div>
+            <% end %>
+            <%= raw cama_form_element_bootstrap_object(r[:form], values[:fields], values_fields, error_fields) %>
             <% if values[:fields].present? && !values[:fields].delete_if{|field| field[:field_type] != 'submit' }.present? %>
                 <%= raw  r[:submit].sub('[submit_label]', @form.the_settings[:railscf_form_button][:name_button])%>
             <% end %>
