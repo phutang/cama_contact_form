@@ -21,15 +21,15 @@
         <%= raw r[:before_form] %>
         <%= form_for @form, url: plugins_cama_contact_form_save_form_path, html: html_attrs do |f| %>
             <%= hidden_field_tag "id", @form.id %>
-            <% if !hide_details_in_flash %>
-            <%= render :partial => "camaleon_cms/flash_messages", locals:{ flash: flash_contact_form } %>
-            <% elsif !error_fields.blank? %>
+            <% if !hide_details_in_flash && !error_fields.blank? %>
             <div class="cama_flash_messages">
                 <div class="alert alert-danger">
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <span><%= t('errors.template.body', default: 'There were problems with the following fields:') %></span>
                 </div>
             </div>
+            <% else %>
+            <%= render :partial => "camaleon_cms/flash_messages", locals:{ flash: flash_contact_form } %>
             <% end %>
             <%= raw cama_form_element_bootstrap_object(r[:form], values[:fields], values_fields, error_fields) %>
             <% if values[:fields].present? && !values[:fields].delete_if{|field| field[:field_type] != 'submit' }.present? %>
